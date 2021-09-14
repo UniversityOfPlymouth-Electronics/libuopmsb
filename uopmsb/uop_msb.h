@@ -13,8 +13,8 @@
 // *             Set the value below to match the board version you are using                        *
 // ******************************************** IMPORTANT ********************************************
 #include "mbed.h"
-//#define MSB_VER 2
-#define MSB_VER 4
+#define MSB_VER 2
+//#define MSB_VER 4
 
 
 #include "Stream.h"
