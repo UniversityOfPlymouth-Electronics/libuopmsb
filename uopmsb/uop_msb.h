@@ -620,7 +620,7 @@ namespace uop_msb {
 
         //PB_5, PB_4, PB_3, PB_2
 
-        EnvSensor(PinName mosi, PinName miso, PinName sclk, PinName cs) : sensor(mosi, miso, sclk, cs)
+        EnvSensor(PinName mosi=PB_5, PinName miso=PB_4, PinName sclk=PB_3, PinName cs=PB_2) : sensor(mosi, miso, sclk, cs)
         {
             //Initialise the mocked humidity algorithm
             hum = hum0 = 50.0f + 30.0f*fRand(); //20.0% .. 80.0%
