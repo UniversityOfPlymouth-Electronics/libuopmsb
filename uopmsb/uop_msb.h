@@ -21,10 +21,10 @@
 
 // Use the sensor for the appropriate board version
 #if MSB_VER == 2
-#include "../lib/EnvSensor/BMP280_SPI/BMP280_SPI.h"
+#include "BMP280_SPI.h"
 #define SENSOR_T BMP280_SPI
 #elif MSB_VER == 4
-#include "../lib/EnvSensor/SPL06-001/SPL06-001.h"
+#include "SPL06-001.h"
 #define SENSOR_T SPL06_001_SPI
 #else
 #error Valid Module Support Board Version is Needed
