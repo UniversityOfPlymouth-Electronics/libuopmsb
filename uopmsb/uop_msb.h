@@ -89,11 +89,17 @@ namespace uop_msb {
     #define STEREO_LEFT_AN_PIN      PB_0
     #define STEREO_RIGHT_AN_PIN     PB_1
 
-    // BMP280 Environmental Sensor
-    #define BMP280_MOSI_PIN PB_5
-    #define BMP280_MISO_PIN PB_4
-    #define BMP280_SCLK_PIN PB_3
-    #define BMP280_CS_PIN   PB_2
+    // Environmental Sensor
+    #define ENV_MOSI_PIN PB_5
+    #define ENV_MISO_PIN PB_4
+    #define ENV_SCLK_PIN PB_3
+    #define ENV_CS_PIN   PB_2
+
+    // DIP SWITCHES
+    #define DIP_SW_0 PF_12
+    #define DIP_SW_1 PF_13
+    #define DIP_SW_2 PF_14
+    #define DIP_SW_3 PF_15
 
     // *********
     // BUTTONS *
@@ -110,6 +116,21 @@ namespace uop_msb {
             
         }
         DigitalIn Button1, Button2, Button3, Button4, BlueButton;
+    };
+
+    class DIPSwitches {
+    private:
+        BusIn DIP;
+    public:
+        DIPSwitches(PinName d0=DIP_SW_0, PinName d1=DIP_SW_1, PinName d2=DIP_SW_2, PinName d3=DIP_SW_3) : DIP(d0,d1,d2,d3) {
+            DIP.mode(PullDown);
+        }
+        operator int() {
+            return DIP;
+        }
+        int operator [] (uint8_t idx) {
+            return DIP[idx & 0b11];
+        }
     };
 
     class LatchedLED {
@@ -620,7 +641,7 @@ namespace uop_msb {
 
         //PB_5, PB_4, PB_3, PB_2
 
-        EnvSensor(PinName mosi=PB_5, PinName miso=PB_4, PinName sclk=PB_3, PinName cs=PB_2) : sensor(mosi, miso, sclk, cs)
+        EnvSensor(PinName mosi=ENV_MOSI_PIN, PinName miso=ENV_MISO_PIN, PinName sclk=ENV_SCLK_PIN, PinName cs=ENV_CS_PIN) : sensor(mosi, miso, sclk, cs)
         {
             //Initialise the mocked humidity algorithm
             hum = hum0 = 50.0f + 30.0f*fRand(); //20.0% .. 80.0%
