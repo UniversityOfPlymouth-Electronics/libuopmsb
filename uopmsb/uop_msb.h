@@ -649,7 +649,9 @@ namespace uop_msb {
             set_time(0);
             prevTime = currTime = time(NULL);
         }
-        ~EnvSensor();
+        ~EnvSensor() {
+            
+        }
 
         float getTemperature() {
             return sensor.getTemperature();
