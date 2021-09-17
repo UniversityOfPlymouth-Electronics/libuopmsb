@@ -1,14 +1,9 @@
 //#include "mbed.h"
 #include "uop_msb.h"
-
-
-//BEGIN
-#include "MPU6050.h"
-using namespace MPU6050_DRIVER;
-
-MPU6050 mpu6050;
-
 using namespace uop_msb;
+
+// Motion Sensor
+MotionSensor motion;
 
 //On board LEDs
 DigitalOut led1(LED1);
@@ -46,32 +41,6 @@ EnvSensor env;
 
 int main()
 {
-    i2c.frequency(400000);  // use fast (400 kHz) I2C 
-    wait_us(1000);
-    uint8_t whoami = mpu6050.readByte(MPU6050_ADDRESS, WHO_AM_I_MPU6050);  // Read WHO_AM_I register for MPU-6050
-    printf("MEMS check: I AM 0x%x\n\r", whoami); printf("I SHOULD BE 0x68\n\r");
-    wait_us(1000);
-
-
-    mpu6050.MPU6050SelfTest(SelfTest); // Start by performing self test and reporting values
-    printf("x-axis self test: acceleration trim within : "); printf("%f", SelfTest[0]); printf("%% of factory value \n\r");
-    printf("y-axis self test: acceleration trim within : "); printf("%f", SelfTest[1]); printf("%% of factory value \n\r");
-    printf("z-axis self test: acceleration trim within : "); printf("%f", SelfTest[2]); printf("%% of factory value \n\r");
-    printf("x-axis self test: gyration trim within : "); printf("%f", SelfTest[3]); printf("%% of factory value \n\r");
-    printf("y-axis self test: gyration trim within : "); printf("%f", SelfTest[4]); printf("%% of factory value \n\r");
-    printf("z-axis self test: gyration trim within : "); printf("%f", SelfTest[5]); printf("%% of factory value \n\r");    
-
-    if(SelfTest[0] < 1.0f && SelfTest[1] < 1.0f && SelfTest[2] < 1.0f && SelfTest[3] < 1.0f && SelfTest[4] < 1.0f && SelfTest[5] < 1.0f) 
-    {
-        mpu6050.resetMPU6050(); // Reset registers to default in preparation for device calibration
-        mpu6050.calibrateMPU6050(gyroBias, accelBias); // Calibrate gyro and accelerometers, load biases in bias registers  
-        mpu6050.initMPU6050();
-        printf("PASSED\n");
-    } else {
-        printf("MPU6050 FAILED SELF TEST\n");
-        while (1);
-    }
-
     // Interrogate Environmental Sensor Driver
     switch (env.getSensorType())
     {
@@ -114,31 +83,13 @@ int main()
         //MEMS
         led1 = 0; led2 = 0; led3 = 0;  
 
-        // Wait for data ready bit set, all data registers have new data
-        while ( (mpu6050.readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) == 0 );
+        Motion_t acc   = motion.getAcceleration();
+        Motion_t gyr   = motion.getGyro();
+        float tempMems = motion.getTemperatureC();
 
-        mpu6050.readAccelData(accelCount);  // Read the x/y/z adc values
-        mpu6050.getAres();
-        
-        // Now we'll calculate the accleration value into actual g's
-        ax = (float)accelCount[0]*aRes - accelBias[0];  // get actual g value, this depends on scale being set
-        ay = (float)accelCount[1]*aRes - accelBias[1];   
-        az = (float)accelCount[2]*aRes - accelBias[2];  
-
-        mpu6050.readGyroData(gyroCount);  // Read the x/y/z adc values
-        mpu6050.getGres();
-
-        // Calculate the gyro value into actual degrees per second
-        gx = (float)gyroCount[0]*gRes; // - gyroBias[0];  // get actual gyro value, this depends on scale being set
-        gy = (float)gyroCount[1]*gRes; // - gyroBias[1];  
-        gz = (float)gyroCount[2]*gRes; // - gyroBias[2];   
-
-        tempCount = mpu6050.readTempData();  // Read the x/y/z adc values
-        temperature = (tempCount) / 340. + 36.53; // Temperature in degrees Centigrade  
-    
-        printf("ax = %f\tay = %f\taz = %f\n", ax, ay, az); 
-        printf("gx = %f\tgy = %f\tgz = %f deg/s\n", gx,gy,gz);         
-        printf("Temp (MPU6050) = %4.1f degC\n\r", temperature); 
+        printf("ax = %f\tay = %f\taz = %f\n",       acc.x, acc.y, acc.z); 
+        printf("gx = %f\tgy = %f\tgz = %f deg/s\n", gyr.x, gyr.y, gyr.z);         
+        printf("Temp (MPU6050) = %4.1f degC\n\r",   tempMems); 
     
         wait_us(1000000); 
     }
