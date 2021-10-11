@@ -36,6 +36,9 @@ DigitalOut backLight(LCD_BKL_PIN);
 //DIP Switches
 DIPSwitches dipSwitches;
 
+//Push Buttons
+Buttons button;
+
 //Environmental Sensor
 EnvSensor env;
 
@@ -68,7 +71,33 @@ int main()
     //LCD Backlight ON
     backLight = 1;
 
+    //Mean Gyro Values
+    Motion_t gyrMean   = motion.getGyro();
+    Motion_t accMean   = motion.getAcceleration();
+    bool isFirstRun = true;
+
     while (true) {
+        
+        if (isFirstRun) {
+            printf("CALIBRATING\n\r");
+            led1 = 1; led2 = 1; led3 = 1;
+            gyrMean = {0.0, 0.0, 0.0};
+            for (uint32_t n=0; n<1000; n++) {
+                Motion_t gyr   = motion.getGyro();
+                gyrMean.x += gyr.x;
+                gyrMean.y += gyr.y;
+                gyrMean.z += gyr.z;
+                wait_us(1000);
+            }
+            gyrMean.x /= 1000.0;
+            gyrMean.y /= 1000.0;
+            gyrMean.z /= 1000.0;
+            isFirstRun = false;
+            
+            //Terminal header
+            printf("%8s,\t%8s,\t%8s,\t%8s,\t%8s,\t%8s,\t%8s\n\r", "acc_x","acc_y","acc_z","gyr_x","gyr_y","gyr_z","temp");
+            continue;
+        }
 
         //Environmental sensor
         led1 = 1; led2 = 1; led3 = 1;
@@ -78,20 +107,20 @@ int main()
         disp.printf("LDR: %0.3f", ldr.read());    
         disp.locate(1, 0);
         disp.printf("%4.2f %5.1f", env.getTemperature(), env.getPressure());
-        wait_us(1000000); 
+        wait_us(200000); 
 
         //MEMS
         led1 = 0; led2 = 0; led3 = 0;  
 
         Motion_t acc   = motion.getAcceleration();
-        Motion_t gyr   = motion.getGyro();
+        Motion_t gyr   = motion.getGyro(); gyr.x -= gyrMean.x; gyr.y -= gyrMean.y; gyr.z -= gyrMean.z; 
         float tempMems = motion.getTemperatureC();
 
-        printf("ax = %f\tay = %f\taz = %f\n",       acc.x, acc.y, acc.z); 
-        printf("gx = %f\tgy = %f\tgz = %f deg/s\n", gyr.x, gyr.y, gyr.z);         
-        printf("Temp (MPU6050) = %4.1f degC\n\r",   tempMems); 
+        printf("%8.3f,\t%8.3f,\t%8.3f,\t", acc.x, acc.y, acc.z); 
+        printf("%8.3f,\t%8.3f,\t%8.3f,\t", gyr.x, gyr.y, gyr.z);         
+        printf("%8.3f\n\r",             tempMems); 
     
-        wait_us(1000000); 
+        wait_us(200000); 
     }
 }
 
