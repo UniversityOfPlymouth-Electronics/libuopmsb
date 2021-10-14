@@ -81,7 +81,8 @@ int SPL06_001_SPI::initialize()
 
     _cs = 0;                    // Select Device nCS active low
         _spi.write(regs::TMP_CFG & spi_mask::SPL06_001_SPI_WRITE); // config
-        _spi.write(0x80|0x30);  // Internal Sensor - 0x30 = 128 Measurement per second - Single Sample rate was 0x00
+//        _spi.write(0x80|0x30);  // Internal Sensor - 0x30 = 128 Measurement per second - Single Sample rate was 0x00
+        _spi.write(0x80|0x00);  // Internal Sensor - 0x30 = 128 Measurement per second - Single Sample rate was 0x00
                                 // 0x80 SET bit 7 see datasheet section 6.1 compare to section 8.4 case example works bit map is wrong - MRS 11/08/2021
     _cs = 1;                    // Deselect Device nCS active low
 

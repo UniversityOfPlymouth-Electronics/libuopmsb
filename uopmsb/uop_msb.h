@@ -324,25 +324,36 @@ namespace uop_msb {
         private:
         uint8_t offsetForNote(const char *noteStr)
         {
+            uint8_t res;
             switch (noteStr[0])
-            {
+            { 
                 case 'A':
-                    return (noteStr[1]=='#') ? 1 : 0;
+                    res = (noteStr[1]=='#') ? 1 : 0;
+                    break;
                 case 'B':
-                    return 2;
+                    res = 2;
+                    break;
                 case 'C':
-                    return (noteStr[1]=='#') ? 4 : 3; 
+                    res = (noteStr[1]=='#') ? 4 : 3; 
+                    break;
                 case 'D':
-                    return (noteStr[1]=='#') ? 6 : 5;                    
+                    res = (noteStr[1]=='#') ? 6 : 5;                    
+                    break;
                 case 'E':
-                    return 7;
+                    res = 7;
+                    break;
                 case 'F':
-                    return (noteStr[1]=='#') ? 9 : 8;                                           
+                    res = (noteStr[1]=='#') ? 9 : 8;                                           
+                    break;
                 case 'G':
-                    return (noteStr[1]=='#') ? 11 : 10;  
+                    res = (noteStr[1]=='#') ? 11 : 10;  
+                    break;
                 default:
-                    return 0;                   
+                    res = 0;                   
+                    break;
             }
+
+            return res;
         }
 
         double note_freq[12] = {
@@ -440,6 +451,8 @@ namespace uop_msb {
                             return 0x94 + column;
                         case 3:
                             return 0xd4 + column;
+                        default:
+                            return 0x80 + column;   //Should never happen
                     }
                 case LCD16x2B:
                     return 0x80 + (row * 40) + column;
