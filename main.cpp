@@ -165,8 +165,13 @@ int main()
 
         printf("%8.3f,\t%8.3f,\t%8.3f,\t%8.6f\n\r", gyrAngle.x, gyrAngle.y, gyrAngle.z, deltaT);
 
-        //Option to recalibrate
-        if (BlueButton == 1) isFirstRun = true;
+        //Option to reset the angle
+        if (BlueButton == 1) {
+            buzz.playTone("A");
+            wait_us(500000);
+            gyrAngle = {0.0, 0.0, 0.0};
+            buzz.rest();
+        };
 
         //Loop time is influenced by the following
         wait_us(25000); 
