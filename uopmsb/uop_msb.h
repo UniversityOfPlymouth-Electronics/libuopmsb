@@ -5,6 +5,8 @@
 //
 // Added support for SPL06-001 environmental sensor
 // updated 14 09 2021
+// Added support for MPU6050 MEMS sensor
+// updated 17 09 2021
 
 #ifndef __UOP_MSB__
 #define __UOP_MSB__
@@ -22,10 +24,12 @@
 // Use the sensor for the appropriate board version
 #if MSB_VER == 2
 #include "BMP280_SPI.h"
-#define SENSOR_T BMP280_SPI
+#include "MPU6050.hpp"  //unpopulated by default - some are retro fitted
+#define ENV_SENSOR_T BMP280_SPI
 #elif MSB_VER == 4
 #include "SPL06-001.h"
-#define SENSOR_T SPL06_001_SPI
+#include "MPU6050.hpp"
+#define ENV_SENSOR_T SPL06_001_SPI
 #else
 #error Valid Module Support Board Version is Needed
 #endif
@@ -320,25 +324,36 @@ namespace uop_msb {
         private:
         uint8_t offsetForNote(const char *noteStr)
         {
+            uint8_t res;
             switch (noteStr[0])
-            {
+            { 
                 case 'A':
-                    return (noteStr[1]=='#') ? 1 : 0;
+                    res = (noteStr[1]=='#') ? 1 : 0;
+                    break;
                 case 'B':
-                    return 2;
+                    res = 2;
+                    break;
                 case 'C':
-                    return (noteStr[1]=='#') ? 4 : 3; 
+                    res = (noteStr[1]=='#') ? 4 : 3; 
+                    break;
                 case 'D':
-                    return (noteStr[1]=='#') ? 6 : 5;                    
+                    res = (noteStr[1]=='#') ? 6 : 5;                    
+                    break;
                 case 'E':
-                    return 7;
+                    res = 7;
+                    break;
                 case 'F':
-                    return (noteStr[1]=='#') ? 9 : 8;                                           
+                    res = (noteStr[1]=='#') ? 9 : 8;                                           
+                    break;
                 case 'G':
-                    return (noteStr[1]=='#') ? 11 : 10;  
+                    res = (noteStr[1]=='#') ? 11 : 10;  
+                    break;
                 default:
-                    return 0;                   
+                    res = 0;                   
+                    break;
             }
+
+            return res;
         }
 
         double note_freq[12] = {
@@ -436,6 +451,8 @@ namespace uop_msb {
                             return 0x94 + column;
                         case 3:
                             return 0xd4 + column;
+                        default:
+                            return 0x80 + column;   //Should never happen
                     }
                 case LCD16x2B:
                     return 0x80 + (row * 40) + column;
@@ -627,7 +644,7 @@ namespace uop_msb {
 
     class EnvSensor {
     private:
-        SENSOR_T sensor;
+        ENV_SENSOR_T sensor;
 
         float hum, hum0, delta; //Humidity and % persecond
         time_t prevTime, currTime;
@@ -689,6 +706,89 @@ namespace uop_msb {
         }
 
     };    //end class
+
+    typedef struct {
+        float x;
+        float y;
+        float z;
+    } Motion_t;
+
+    class MotionSensor : MPU6050_DRIVER::MPU6050 {
+        public:
+        MotionSensor(PinName SDA=PB_11, PinName SDC=PB_10, int i2cFreq = 400000) : MPU6050_DRIVER::MPU6050(SDA, SDC, i2cFreq)
+        {
+            if (_whoami != 0x68) {
+                DEBUG_PRINT("ERROR: MotionSensor Constructor: Wrong whoami value. Is the board populated?\n");
+            }
+        }
+
+        // Read x,y and z values from the accelerometer
+        Motion_t getAcceleration()
+        {
+            if (_whoami != 0x68) {
+                return {0.0f, 0.0f, 0.0f};
+            }
+
+            Motion_t acc;
+            // Wait for data ready bit set, all data registers have new data
+            while ( (readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) == 0 );
+
+            int16_t accelCount[3];
+            readAccelData(accelCount);  // Read the x/y/z adc values
+            getAres();
+
+            // Now we'll calculate the accleration value into actual g's
+            acc.x = (float)accelCount[0]*aRes - accelBias[0];  // get actual g value, this depends on scale being set
+            acc.y = (float)accelCount[1]*aRes - accelBias[1];   
+            acc.z = (float)accelCount[2]*aRes - accelBias[2];  
+
+            return acc;
+        }
+
+        // Read x,y and z values from the gyroscope
+        Motion_t getGyro()
+        {
+            if (_whoami != 0x68) {
+                return {0.0f, 0.0f, 0.0f};
+            }
+
+            Motion_t gyro;
+            // Wait for data ready bit set, all data registers have new data
+            while ( (readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) == 0 );
+
+            int16_t gyroCount[3];  
+            readGyroData(gyroCount);  // Read the x/y/z adc values
+            getGres();
+
+            // Calculate the gyro value into actual degrees per second
+            gyro.x = (float)gyroCount[0]*gRes; // - gyroBias[0];  // get actual gyro value, this depends on scale being set
+            gyro.y = (float)gyroCount[1]*gRes; // - gyroBias[1];  
+            gyro.z = (float)gyroCount[2]*gRes; // - gyroBias[2];  
+
+            return gyro;
+        }
+
+        // Read temperature using the MPU6050
+        float getTemperatureC()
+        {
+            if (_whoami != 0x68) {
+                return 0.0f;
+            }
+            
+            // Wait for data ready bit set, all data registers have new data
+            while ( (readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) == 0 );
+
+            float tempC = (float)readTempData();    // 
+            temperature = tempC / 340. + 36.53;     // Temperature in degrees Centigrade             
+            return temperature;
+        }
+
+        // Get the device ID
+        uint8_t whoAmI() {
+            return _whoami;
+        }
+
+    };
 
 }
 
