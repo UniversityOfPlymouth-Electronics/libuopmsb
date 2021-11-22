@@ -4,9 +4,9 @@
         "*": {
             "target.printf_lib": "std",
             "target.c_lib": "std",   
-            "target.components_add": ["SD"],     
+            "target.components_add": ["SD"],
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-buffered-serial": 1
-        }
+        }      
     }
 }

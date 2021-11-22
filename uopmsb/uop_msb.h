@@ -21,6 +21,14 @@
 
 #include "Stream.h"
 
+// SD Support?
+#if (MBED_CONF_RTOS_PRESENT == 1)
+#if (MBED_CONF_SD_FSFAT_SDCARD_INSTALLED == 1)
+#define USE_SD_CARD
+#endif
+#endif
+//            "target.components_add": ["SD"],  
+
 // Use the sensor for the appropriate board version
 #if MSB_VER == 2
 #include "BMP280_SPI.h"
@@ -221,7 +229,16 @@ namespace uop_msb {
                                         dataBus(LED_D0_PIN, LED_D1_PIN, LED_D2_PIN, LED_D3_PIN, LED_D4_PIN, LED_D5_PIN, LED_D6_PIN, LED_D7_PIN)                             
             {                                
                 //Further initialisation here 
+                dataBus = 0;
+                LED_RED_LE  = 1;
+                LED_GRN_LE  = 1;
+                LED_BLUE_LE = 1;
+                wait_us(5);   
+                LED_RED_LE  = 0;
+                LED_GRN_LE  = 0;
+                LED_BLUE_LE = 0; 
             }
+
             ~LatchedLED() {
                 LED_BAR_OE = 1;
                 LED_DIGIT_OE = 1;
@@ -242,7 +259,22 @@ namespace uop_msb {
             }
 
             void setGroup(LEDGROUP grp) {
-                _grp = grp;
+                if (_grp != grp) {
+                    _grp = grp;
+                }
+            }
+
+            void setMode(LEDMODE mode) {
+                if (_mode != mode) {
+                    LED_D1_LE = 0;
+                    LED_D2_LE = 0;
+                    LED_RED_LE = 0;
+                    LED_GRN_LE = 0;
+                    LED_BLUE_LE = 0;                     
+                    _mode = mode;
+                }
+                
+                
             }
 
             void write(uint8_t dat) {
@@ -790,7 +822,7 @@ namespace uop_msb {
 
     };
 
-    // ******************************* BOARD TEST CLASS **********************************************
+    // ********************************************** BOARD TEST CLASS **********************************************
     class UOP_MSB {
     private:
         // Motion Sensor
@@ -834,18 +866,31 @@ namespace uop_msb {
         Buttons button;
 
         //Environmental Sensor
-        EnvSensor env;    
+        EnvSensor env;   
+
+        // 3x8 LED Strips + 7-seg display
+        LatchedLED sevenSeg;
+
+        // LED Matrix 
+        SPI matrix_spi;   // MOSI, MISO, SCLK
+        DigitalOut matrix_spi_cs;            //Chip Select ACTIVE LOW
+        DigitalOut matrix_spi_oe;           //Output Enable ACTIVE LOW        
 
         public:
         UOP_MSB() : led1(LED1), led2(LED2), led3(LED3), BlueButton(USER_BUTTON), 
                     traf1RedLED(TRAF_RED1_PIN,1), traf1YelLED(TRAF_YEL1_PIN), traf1GrnLED(TRAF_GRN1_PIN),
                     traf2RedLED(TRAF_RED2_PIN, PIN_OUTPUT, OpenDrainNoPull, 0), traf2YelLED(TRAF_YEL2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1), traf2GrnLED(TRAF_GRN2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1),
-                    ldr(AN_LDR_PIN), pot(AN_POT_PIN), backLight(LCD_BKL_PIN)
+                    ldr(AN_LDR_PIN), pot(AN_POT_PIN), backLight(LCD_BKL_PIN), sevenSeg(LatchedLED::LEDMODE::SEVEN_SEG),
+                    matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12)
         {
             //Constructor
         }
 
         void test();
+
+        private:
+        void clearMatrix(void);
+        void matrix_scan(void);
 
     };    
 
