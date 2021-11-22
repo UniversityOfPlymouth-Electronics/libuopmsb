@@ -790,6 +790,65 @@ namespace uop_msb {
 
     };
 
+    // ******************************* BOARD TEST CLASS **********************************************
+    class UOP_MSB {
+    private:
+        // Motion Sensor
+        MotionSensor motion;
+
+        //On board LEDs
+        DigitalOut led1;
+        DigitalOut led2;
+        DigitalOut led3;
+        
+        //On board switch
+        DigitalIn BlueButton;
+
+        //LCD Display
+        LCD_16X2_DISPLAY disp;
+
+        //Buzzer
+        Buzzer buzz;
+
+        //Traffic Lights
+        DigitalOut traf1RedLED;
+        DigitalOut traf1YelLED;
+        DigitalOut traf1GrnLED;
+        DigitalInOut traf2RedLED;
+        DigitalInOut traf2YelLED;
+        DigitalInOut traf2GrnLED;
+
+        //Light Levels
+        AnalogIn ldr;
+
+        //Pot
+        AnalogIn pot;
+
+        //LCD Backlight
+        DigitalOut backLight;
+
+        //DIP Switches
+        DIPSwitches dipSwitches;
+
+        //Push Buttons
+        Buttons button;
+
+        //Environmental Sensor
+        EnvSensor env;    
+
+        public:
+        UOP_MSB() : led1(LED1), led2(LED2), led3(LED3), BlueButton(USER_BUTTON), 
+                    traf1RedLED(TRAF_RED1_PIN,1), traf1YelLED(TRAF_YEL1_PIN), traf1GrnLED(TRAF_GRN1_PIN),
+                    traf2RedLED(TRAF_RED2_PIN, PIN_OUTPUT, OpenDrainNoPull, 0), traf2YelLED(TRAF_YEL2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1), traf2GrnLED(TRAF_GRN2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1),
+                    ldr(AN_LDR_PIN), pot(AN_POT_PIN), backLight(LCD_BKL_PIN)
+        {
+            //Constructor
+        }
+
+        void test();
+
+    };    
+
 }
 
 #endif
