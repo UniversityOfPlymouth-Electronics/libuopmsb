@@ -8,6 +8,39 @@
 // Added support for MPU6050 MEMS sensor
 // updated 17 09 2021
 
+/* mbed_app.json
+
+You need RTOS and SD card support added to get full functionality
+
+{
+    "target_overrides": {
+        "*": {
+            "target.printf_lib": "std",
+            "target.c_lib": "std",   
+            "target.components_add": ["SD"],
+            "platform.stdio-baud-rate": 115200,
+            "platform.stdio-buffered-serial": 1
+        }      
+    }
+}
+
+For baremetal, you cannot use the SD card, so remove the component
+
+{
+    "requires": ["bare-metal"],
+    "target_overrides": {
+        "*": {
+            "target.printf_lib": "std",
+            "target.c_lib": "std",   
+            "platform.stdio-baud-rate": 115200,
+            "platform.stdio-buffered-serial": 1
+        }      
+    }
+}
+
+*/
+
+
 #ifndef __UOP_MSB__
 #define __UOP_MSB__
 
