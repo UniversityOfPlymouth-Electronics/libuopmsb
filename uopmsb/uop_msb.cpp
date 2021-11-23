@@ -8,7 +8,7 @@ using namespace std;
 #define SCAN_RATE_MS   50
 
 // Clear the LED matrix (code by Martin Simpson)
-void UOP_MSB::clearMatrix(void)
+void UOP_MSB_TEST::clearMatrix(void)
 {
     matrix_spi_cs=0;           //CLEAR Matrix
     matrix_spi.write(0x00);//COL RHS
@@ -18,7 +18,7 @@ void UOP_MSB::clearMatrix(void)
 }
 
 // Test the LED matrix (code by Martin Simpson)
-void UOP_MSB::matrix_scan(void)
+void UOP_MSB_TEST::matrix_scan(void)
 {
     for (int j=0;j<=7;j++)  //NB ROW has 3 to 8 decoder so 0 to 7 to Row Select
                             //COLUMNS(COL) are 0 to 255 to select each Byte
@@ -146,7 +146,7 @@ int read_sdcard()
 #endif
 
 
-void UOP_MSB::test() 
+void UOP_MSB_TEST::test() 
 {
     //LCD Backlight ON
     backLight = 1;

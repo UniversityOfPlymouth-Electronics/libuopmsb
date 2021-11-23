@@ -3,7 +3,7 @@
 using namespace uop_msb;
 
 // This object is ONLY for testing the board. Do NOT use in your own code :)
-UOP_MSB board;
+UOP_MSB_TEST board;
 
 int main()
 {

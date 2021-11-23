@@ -823,7 +823,7 @@ namespace uop_msb {
     };
 
     // ********************************************** BOARD TEST CLASS **********************************************
-    class UOP_MSB {
+    class UOP_MSB_TEST {
     private:
         // Motion Sensor
         MotionSensor motion;
@@ -877,7 +877,7 @@ namespace uop_msb {
         DigitalOut matrix_spi_oe;           //Output Enable ACTIVE LOW        
 
         public:
-        UOP_MSB() : led1(LED1), led2(LED2), led3(LED3), BlueButton(USER_BUTTON), 
+        UOP_MSB_TEST() : led1(LED1), led2(LED2), led3(LED3), BlueButton(USER_BUTTON), 
                     traf1RedLED(TRAF_RED1_PIN,1), traf1YelLED(TRAF_YEL1_PIN), traf1GrnLED(TRAF_GRN1_PIN),
                     traf2RedLED(TRAF_RED2_PIN, PIN_OUTPUT, OpenDrainNoPull, 0), traf2YelLED(TRAF_YEL2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1), traf2GrnLED(TRAF_GRN2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1),
                     ldr(AN_LDR_PIN), pot(AN_POT_PIN), backLight(LCD_BKL_PIN), sevenSeg(LatchedLED::LEDMODE::SEVEN_SEG),
