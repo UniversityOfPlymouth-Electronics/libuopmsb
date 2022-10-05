@@ -7,6 +7,9 @@
 // updated 14 09 2021
 // Added support for MPU6050 MEMS sensor
 // updated 17 09 2021
+//
+// Added class for LEDMatrix and further definitions for the associated pins
+// updated 05 10 2022
 
 /* mbed_app.json
 
@@ -140,11 +143,32 @@ namespace uop_msb {
     #define ENV_SCLK_PIN PB_3
     #define ENV_CS_PIN   PB_2
 
+    // MATRIX
+    #define MATRIX_LATCH_PIN PB_6
+    #define MATRIX_OE_PIN    PB_12
+    #define SPI3_SCK_PIN     PC_10
+    #define SPI3_MISO_PIN    PC_11
+    #define SPI3_MOSI_PIN    PC_12
+
     // DIP SWITCHES
     #define DIP_SW_0 PF_12
     #define DIP_SW_1 PF_13
     #define DIP_SW_2 PF_14
     #define DIP_SW_3 PF_15
+
+    // LCD
+    #define LCD_D0_PIN PD_0
+    #define LCD_D1_PIN PD_1
+    #define LCD_D2_PIN PD_2
+    #define LCD_D3_PIN PD_3
+    #define LCD_D4_PIN PD_4
+    #define LCD_D5_PIN PD_5
+    #define LCD_D6_PIN PD_6
+    #define LCD_D7_PIN PD_7
+    #define LCD_RS_PIN PD_11
+    #define LCD_RW_PIN PD_12
+    #define LCD_E_PIN PD_13
+    #define LCD_BKL_PIN PD_14    
 
     // *********
     // BUTTONS *
@@ -426,24 +450,6 @@ namespace uop_msb {
         };
 
     };
-
-    // THE MATRIX
-    #define MATRIX_LATCH_PIN PB_6
-    #define MATRIX_OE_PIN PB_12
-
-    // LCD
-    #define LCD_D0_PIN PD_0
-    #define LCD_D1_PIN PD_1
-    #define LCD_D2_PIN PD_2
-    #define LCD_D3_PIN PD_3
-    #define LCD_D4_PIN PD_4
-    #define LCD_D5_PIN PD_5
-    #define LCD_D6_PIN PD_6
-    #define LCD_D7_PIN PD_7
-    #define LCD_RS_PIN PD_11
-    #define LCD_RW_PIN PD_12
-    #define LCD_E_PIN PD_13
-    #define LCD_BKL_PIN PD_14
 
     class LCD_16X2_DISPLAY : public Stream {
     public:
@@ -914,7 +920,7 @@ namespace uop_msb {
                     traf1RedLED(TRAF_RED1_PIN,1), traf1YelLED(TRAF_YEL1_PIN), traf1GrnLED(TRAF_GRN1_PIN),
                     traf2RedLED(TRAF_RED2_PIN, PIN_OUTPUT, OpenDrainNoPull, 0), traf2YelLED(TRAF_YEL2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1), traf2GrnLED(TRAF_GRN2_PIN, PIN_OUTPUT, OpenDrainNoPull, 1),
                     ldr(AN_LDR_PIN), pot(AN_POT_PIN), backLight(LCD_BKL_PIN), sevenSeg(LatchedLED::LEDMODE::SEVEN_SEG),
-                    matrix_spi(PC_12, PC_11, PC_10), matrix_spi_cs(PB_6), matrix_spi_oe(PB_12)
+                    matrix_spi(SPI3_MOSI_PIN, SPI3_MISO_PIN, SPI3_SCK_PIN), matrix_spi_cs(MATRIX_LATCH_PIN), matrix_spi_oe(MATRIX_OE_PIN)
         {
             //Constructor
         }
