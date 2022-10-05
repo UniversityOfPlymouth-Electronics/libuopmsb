@@ -28,7 +28,7 @@ private:
         matrix_spi.write(row & 0x07);   //ROW RHS
 
         // End the SPI transaction by pulling Chip Select HIGH
-        matrix_spi_cs=1;                //low to high will effectivelly LATCH the Shift register to output    
+        matrix_spi_cs=1;                //low to high will effectively LATCH the Shift register to output    
     } 
 
 public:
@@ -61,16 +61,21 @@ private:
     volatile int8_t  deltaY=0;
     volatile uint8_t phase = 0;
     Ticker xyTicker;  
-
+    #if (MBED_CONF_RTOS_PRESENT == 1)
+    Thread t1;
+    EventQueue queue;
+    #endif
+    //Draw dot on table
     void centreDot() 
     {
         uint16_t x = (deltaX >= 0) ? (0b0000000110000000 << deltaX) : (0b0000000110000000 >> abs(deltaX));
         uint8_t  y = 3+phase+deltaY;
+
         matrix_spi_cs=0;                //Send Data to Matrix
         matrix_spi.write(x >> 8);       //COL RHS
         matrix_spi.write(x & 0x00FF);   //COL LHS
         matrix_spi.write(y & 0x07);     //ROW RHS
-        matrix_spi_cs=1;                //low to high will effectivelly LATCH the Shift register to output    
+        matrix_spi_cs=1;                //low to high will effectively LATCH the Shift register to output    
 
         //Flip phase
         phase = 1-phase;   
@@ -80,7 +85,17 @@ private:
 public:
     BalanceTable() : LEDMatrix()
     {
+        #if (MBED_CONF_RTOS_PRESENT == 1)
+        //For RTOS, use a thread
+        auto go = [&](){
+            queue.dispatch_forever();
+        };
+        t1.start(go);
+        queue.call_every(10ms, callback(this, &BalanceTable::centreDot));
+        #else
+        //Simple version - no RTOS
         xyTicker.attach(callback(this, &BalanceTable::centreDot), 10ms);
+        #endif
     }
 
     void setXYoffset(int8_t dX, int8_t dY)
