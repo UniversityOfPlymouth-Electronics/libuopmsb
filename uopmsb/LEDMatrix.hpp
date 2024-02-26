@@ -38,6 +38,10 @@ public:
         //Nothing to do yet
     }
 
+    void enableLEDS(bool _en) {
+        matrix_spi_oe = _en ? 0 : 1; 
+    }       
+
     void xyplot(const uint8_t x, const uint8_t y) {
         this->rcplot(y, x);
     }
