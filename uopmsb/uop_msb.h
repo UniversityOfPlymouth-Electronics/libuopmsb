@@ -53,6 +53,7 @@ For baremetal, you cannot use the SD card, so remove the component
 #include "mbed.h"
 //#define MSB_VER 2
 #define MSB_VER 4
+#define USER_BUTTON    PC_13
 
 
 #include "Stream.h"
